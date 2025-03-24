@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">PairShareChat</string>
+    <string name="scan_devices">Scan Devices</string>
+    <string name="device_name">Device Name</string>
+    <string name="ip_address">IP Address</string>
+    <string name="status_ready">Status: Ready</string>
+    <string name="status">"Status: "</string>
+    <string name="chat_messages">Chat Messages</string>
+    <string name="enter_message">Enter message...</string>
+    <string name="send">Send</string>
+</resources>
