@@ -54,26 +54,16 @@ public class MainActivity extends AppCompatActivity implements WifiP2pManager.Pe
     private String[] getRequiredPermissions() {
         int deviceVersion = Build.VERSION.SDK_INT;
 
-        // For devices running below Android 6 (API 23), permissions are granted at install time.
         if (deviceVersion < Build.VERSION_CODES.M) {
-            return new String[0];
+            return new String[0]; // Below Android 6 (API 23), permissions granted at install
         }
 
-        // For devices running Android 12 (API 31) and above, include NEARBY_WIFI_DEVICES.
-        if (deviceVersion >= Build.VERSION_CODES.S) { // Build.VERSION_CODES.S corresponds to Android 12 (API 31)
-            return new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_WIFI_STATE,
-                    Manifest.permission.CHANGE_WIFI_STATE,
-//                    Manifest.permission.NEARBY_WIFI_DEVICES
-            };
-        } else {
-            // For devices below Android 12, the older permissions are sufficient.
-            return new String[]{
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                    Manifest.permission.ACCESS_WIFI_STATE,
-                    Manifest.permission.CHANGE_WIFI_STATE
-            };
+        if (deviceVersion >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            return new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE, Manifest.permission.NEARBY_WIFI_DEVICES};
+        } else if (deviceVersion >= Build.VERSION_CODES.S) { // Android 12
+            return new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE};
+        } else { // Below Android 12
+            return new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_WIFI_STATE, Manifest.permission.CHANGE_WIFI_STATE};
         }
     }
 
@@ -156,12 +146,11 @@ public class MainActivity extends AppCompatActivity implements WifiP2pManager.Pe
     private boolean hasRequiredPermissions() {
         int deviceVersion = Build.VERSION.SDK_INT;
 
-        if (deviceVersion >= Build.VERSION_CODES.S) { // Android 12+
-            return ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) == PackageManager.PERMISSION_GRANTED &&
-                    ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED;
-        } else {
+        if (deviceVersion >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+            return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.NEARBY_WIFI_DEVICES) == PackageManager.PERMISSION_GRANTED;
+        } else if (deviceVersion >= Build.VERSION_CODES.S) { // Android 12
+            return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED;
+        } else { // Below Android 12
             return ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_WIFI_STATE) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.CHANGE_WIFI_STATE) == PackageManager.PERMISSION_GRANTED;
         }
     }

@@ -10,6 +10,7 @@ import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.wifi.p2p.WifiP2pManager;
 import android.net.wifi.p2p.WifiP2pManager.Channel;
+import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -45,13 +46,22 @@ public class WiFiDirectBroadcastReceiver extends BroadcastReceiver {
         } else if (WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION.equals(action)) {
             // The peer list has changed! Request the updated list.
             if (mManager != null) {
-                // Use context instead of "this" for permission check
-                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED ||
-                        ActivityCompat.checkSelfPermission(context, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED) {
-                    // Missing required permissions; log, toast, and return.
-                    Log.d(TAG, "Missing required Wi-Fi Direct permissions. Please request them in the Activity.");
-                    Toast.makeText(context, "Missing required Wi-Fi Direct permissions.", Toast.LENGTH_SHORT).show();
+                if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                    Log.d(TAG, "Missing ACCESS_FINE_LOCATION permission.");
                     return;
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) { // Android 13+
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.NEARBY_WIFI_DEVICES) != PackageManager.PERMISSION_GRANTED) {
+                        Log.d(TAG, "Missing NEARBY_WIFI_DEVICES permission on Android 13+");
+                        return;
+                    }
+                } else {
+                    // Android 12 and below
+                    if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        Log.d(TAG, "Missing ACCESS_FINE_LOCATION permission on Android 12 or below");
+                        return;
+                    }
                 }
                 mManager.requestPeers(mChannel, mActivity);
             }
