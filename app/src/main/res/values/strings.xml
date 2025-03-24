@@ -8,4 +8,5 @@
     <string name="chat_messages">Chat Messages</string>
     <string name="enter_message">Enter message...</string>
     <string name="send">Send</string>
+    <string name="disconnect">Disconnect</string>
 </resources>

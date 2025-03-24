@@ -53,6 +53,9 @@ public class ChatActivity extends AppCompatActivity {
         rvChat.setLayoutManager(new LinearLayoutManager(this));
         rvChat.setAdapter(chatAdapter);
 
+        MaterialButton btnDisconnect = findViewById(R.id.btnDisconnect);
+        btnDisconnect.setOnClickListener(v -> disconnect());
+
         groupOwnerAddress = getIntent().getStringExtra("groupOwnerAddress");
         isGroupOwner = getIntent().getBooleanExtra("isGroupOwner", false);
         Toast.makeText(this, "Connecting...", Toast.LENGTH_SHORT).show();
@@ -72,6 +75,17 @@ public class ChatActivity extends AppCompatActivity {
         });
     }
 
+    private void disconnect() {
+        try {
+            if (serverSocket != null) serverSocket.close();
+            if (clientSocket != null) clientSocket.close();
+            Toast.makeText(this, "Disconnected", Toast.LENGTH_SHORT).show();
+        } catch (IOException e) {
+            Log.e(TAG, "Error during disconnection", e);
+        }
+        finish(); // Optionally close the activity
+    }
+
     private void startServer() {
         new Thread(() -> {
             try {
@@ -79,6 +93,9 @@ public class ChatActivity extends AppCompatActivity {
                 handler.post(() -> Toast.makeText(this, "Server started, waiting for client...", Toast.LENGTH_SHORT).show());
                 Socket client = serverSocket.accept();
                 BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
+                PrintWriter out = new PrintWriter(client.getOutputStream(), true);
+                // Save output stream for sending messages
+                clientOut = out;
                 String line;
                 while ((line = in.readLine()) != null) {
                     String finalLine = line;
@@ -91,7 +108,11 @@ public class ChatActivity extends AppCompatActivity {
                 in.close();
                 client.close();
             } catch (IOException e) {
-                Log.e(TAG, "Server error", e);
+                if (e instanceof java.net.SocketException && e.getMessage().equals("Socket closed")) {
+                    Log.i(TAG, "Socket closed gracefully.");
+                } else {
+                    Log.e(TAG, "Client error", e);
+                }
             } finally {
                 try {
                     if (serverSocket != null) serverSocket.close();
@@ -119,7 +140,11 @@ public class ChatActivity extends AppCompatActivity {
                 in.close();
                 clientSocket.close();
             } catch (IOException e) {
-                Log.e(TAG, "Client error", e);
+                if (e instanceof java.net.SocketException && e.getMessage().equals("Socket closed")) {
+                    Log.i(TAG, "Socket closed gracefully.");
+                } else {
+                    Log.e(TAG, "Client error", e);
+                }
             }
         }).start();
     }
@@ -127,7 +152,7 @@ public class ChatActivity extends AppCompatActivity {
     private void sendMessage(String message) {
         new Thread(() -> {
             try {
-                if (!isGroupOwner && clientOut != null) {
+                if (clientOut != null) {
                     clientOut.println(message);
                 }
                 handler.post(() -> {
