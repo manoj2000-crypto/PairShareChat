@@ -11,4 +11,13 @@
         android:background="@drawable/bg_sent"
         android:padding="8dp"
         android:textColor="#FFF" />
+
+    <ImageView
+        android:id="@+id/imgSentPreview"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
+
 </LinearLayout>

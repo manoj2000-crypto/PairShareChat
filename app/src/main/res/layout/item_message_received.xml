@@ -11,4 +11,12 @@
         android:background="@drawable/bg_received"
         android:padding="8dp"
         android:textColor="#000" />
+
+    <ImageView
+        android:id="@+id/imgReceivedPreview"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:visibility="gone" />
+
 </LinearLayout>
